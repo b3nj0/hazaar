@@ -1,6 +1,6 @@
 (ns hzr.audio
-  (:use [clojure.java.io :only [file]])
-  (:import [javax.sound.sampled AudioSystem AudioInputStream AudioFormat AudioFormat$Encoding]
+  (:require [clojure.java.io :as io])
+  (:import [javax.sound.sampled AudioSystem AudioInputStream AudioFormat AudioFormat$Encoding DataLine$Info TargetDataLine]
            [java.io File]))
 
 (defn- base-to-decoded-format [base-format]
@@ -13,7 +13,27 @@
                   (.getSampleRate base-format)
                   big-endian)))
 
-(defn decode [filename fn]
-  (with-open [in (AudioSystem/getAudioInputStream (file filename))
+(defn decode-audio-file [filename fn]
+  (with-open [in (AudioSystem/getAudioInputStream (io/file filename))
               decoded-in (AudioSystem/getAudioInputStream (base-to-decoded-format (.getFormat in)) in)]
     (fn decoded-in)))
+
+(defn decoded-audio-file [filename]
+  (let [buffer (java.io.ByteArrayOutputStream.)]
+    (decode-audio-file filename #(io/copy % buffer))
+    (.toByteArray buffer)))
+
+(defn- microphone-format []
+  (let [sample-rate 44100
+        sample-size-in-bits 8
+        channels 1
+        signed true
+        big-endian false]
+    (AudioFormat. sample-rate sample-size-in-bits channels signed big-endian)))
+
+(defn record-microphone [fn]
+  (let [info (DataLine$Info. (type TargetDataLine) (microphone-format))]
+    (with-open [line (AudioSystem/getLine info)]
+      (.start line)
+      (fn line)
+      (.stop line))))
