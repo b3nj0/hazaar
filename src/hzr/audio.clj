@@ -1,4 +1,4 @@
-(ns hzr.mp3
+(ns hzr.audio
   (:use [clojure.java.io :only [file]])
   (:import [javax.sound.sampled AudioSystem AudioInputStream AudioFormat AudioFormat$Encoding]
            [java.io File]))
