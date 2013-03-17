@@ -5,14 +5,14 @@
   (:import [java.util Arrays]))
 
 (defn index-audio-file [file]
-  (let [bytes (audio/decoded-audio-file file)
-        byte-count (alength bytes)
-        chunk-size 4096]
-    (loop [pos 0]
-      (if-not (> pos byte-count)
-        (do
-          (println (fingerprint/fingerprint (Arrays/copyOfRange bytes pos (+ pos chunk-size))))
-          (recur (+ pos chunk-size)))))))
+  (audio/decode-audio-file file
+                           (fn [in]   (let [chunk-size 4096
+                                           buffer (make-array Byte/TYPE chunk-size)]
+                                       (loop [bc (.read in buffer)]
+                                         (if-not (= bc -1)
+                                           (do
+                                             (println (fingerprint/fingerprint buffer))
+                                             (recur (.read in buffer)))))))))
 
 (defn index [dir]
   (->> (filter #(.isFile %) (file-seq (io/file dir)))
