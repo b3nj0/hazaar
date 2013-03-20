@@ -4,12 +4,13 @@
             [hzr.fingerprint :as fingerprint])
   (:import [java.util Arrays]))
 
+(def chunk-size 8192)
+
 ;; hash of fingerprint to list of songs
 (def fingerprint-index (atom {}))
 
 (defn fingerprint-audio-stream [in]
-  (let [chunk-size 4096
-        buffer (make-array Byte/TYPE chunk-size)]
+  (let [buffer (make-array Byte/TYPE chunk-size)]
     (loop [bc (.read in buffer)
            fingerprints []]
       (if (= bc -1)
@@ -43,13 +44,10 @@
 (defn map-count [map key]
   (assoc map key (inc (get map key 0))))
 
-(defmacro dbg[x] `(let [x# ~x] (println "dbg:" '~x "=" x#) x#))
-
 (defn match-stream [in]
-  (let [chunk-size 4096
-        buffer (make-array Byte/TYPE chunk-size)
-        scratch (.read in buffer 0 1800)]
-    (loop [bc (.read in buffer)
+  (let [buffer (make-array Byte/TYPE chunk-size)
+        scratch (.read in buffer 0 100)]
+    (loop [bc (.read in buffer 0 chunk-size)
            pos 0
            matches {}]
       (if (or (= bc -1) (> pos 10000))
