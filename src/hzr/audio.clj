@@ -4,7 +4,7 @@
            [java.io File]))
 
 (defn- base-to-decoded-format [base-format]
-  (let [big-endian false]
+  (let [big-endian true]
     (AudioFormat. AudioFormat$Encoding/PCM_SIGNED
                   (.getSampleRate base-format)
                   16
@@ -28,7 +28,7 @@
         sample-size-in-bits 8
         channels 1
         signed true
-        big-endian false]
+        big-endian true]
     (AudioFormat. sample-rate sample-size-in-bits channels signed big-endian)))
 
 (defn record-microphone [fn]
