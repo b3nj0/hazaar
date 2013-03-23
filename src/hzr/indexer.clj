@@ -7,6 +7,7 @@
 (def chunk-size 8192)
 
 ;; hash of fingerprint to list of songs
+;;; the contents of the index are: {fingerprint [{offset song-name}*]*}
 (def fingerprint-index (atom {}))
 
 (defn fingerprint-audio-stream [in]
@@ -44,9 +45,8 @@
 (defn map-count [map key]
   (assoc map key (inc (get map key 0))))
 
-(defn match-stream [in]
-  (let [buffer (make-array Byte/TYPE chunk-size)
-        scratch (.read in buffer 0 100)]
+(defn match-stream [in filename]
+  (let [buffer (make-array Byte/TYPE chunk-size)]
     (loop [bc (.read in buffer 0 chunk-size)
            pos 0
            matches {}]
