@@ -17,10 +17,9 @@
   (let [s (.state this)
         next @(:next s)]
     (if (= -1 next)
-      (let [b0 (.read (:in s))
-            b1 (.read (:in s))
-            b2 (.read (:in s))
-            b3 (.read (:in s))
+      (let [bs (make-array Byte/TYPE 4)
+            bc (.read (:in s))
+            [b0 b1 b2 b3] bs
             left  (+ (* b0 256) b1)
             right (+ (* b2 256) b3)
             mono (/ (+ left right) 2)]
