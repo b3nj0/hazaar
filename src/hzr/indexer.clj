@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [hzr.audio :as audio]
             [hzr.fingerprint :as fingerprint])
-  (:import [java.util Arrays]))
+  (:import [java.io ByteArrayInputStream]
+           [java.util Arrays]))
 
 (def chunk-size 8192)
 
@@ -10,7 +11,9 @@
 ;;; the contents of the index are: {fingerprint [{offset song-name}*]*}
 (def fingerprint-index (atom {}))
 
-(defn fingerprint-audio-stream [in]
+;; fingerprinting
+
+(defn fingerprint-stream [^java.io.InputStream in]
   (let [buffer (make-array Byte/TYPE chunk-size)]
     (loop [bc (.read in buffer)
            fingerprints []]
@@ -18,34 +21,18 @@
         fingerprints
         (recur (.read in buffer) (conj fingerprints (fingerprint/fingerprint buffer)))))))
 
-(defn fingerprint-audio-file [file]
-  (audio/decode-audio-file file fingerprint-audio-stream))
-
-(defn load-audio-file-index [file]
-  (let [audio-file (io/file file)
-        index-file (io/file (str "index/" (.getName audio-file) ".idx"))]
-    (if (.exists index-file)
-      (read-string (slurp index-file))
-      (let [fprints (fingerprint-audio-file audio-file)
-            fingerprint-data {:filename (.getPath audio-file) :fingerprints fprints}]
-        (spit index-file fingerprint-data)
-        fingerprint-data))))
-
-(defn index-audio-file [file]
-  (let [fingerprint-data (load-audio-file-index file)
-        filename (keyword (:filename fingerprint-data))
-        fps (:fingerprints fingerprint-data)
-        index-data (map-indexed (fn [idx fp] {fp {idx filename}}) fps)]
+(defn add-to-index [file ^java.io.InputStream in]
+  (let [fingerprint-data (fingerprint-stream in)
+        filename (keyword (.getPath file))
+        index-data (map-indexed (fn [idx fp] {fp {idx filename}}) fingerprint-data)]
     (swap! fingerprint-index #(apply merge-with conj % index-data))))
 
-(defn index-audio-dir [dir]
-  (->> (filter #(.isFile %) (file-seq (io/file dir)))
-       (map index-audio-file)))
+;; matching
 
 (defn map-count [map key]
   (assoc map key (inc (get map key 0))))
 
-(defn match-stream [in filename]
+(defn match-stream [in]
   (let [buffer (make-array Byte/TYPE chunk-size)]
     (loop [bc (.read in buffer 0 chunk-size)
            pos 0
@@ -61,3 +48,23 @@
             (recur (.read in buffer)
                    (inc pos)
                    newmatches)))))))
+
+;; search a directory for duplicate mp3s
+
+(defn match-and-index-file [filename]
+  (println "Matching " filename)
+  (let [audio-data (audio/decoded-audio-file filename)
+        [pos  matches] (match-stream (ByteArrayInputStream. audio-data))]
+    (add-to-index filename (ByteArrayInputStream. audio-data))
+    (if (some #(> % 20) (vals matches))
+      (println filename " matches: " (first (sort-by second > matches)))
+      (println "No match for: " filename))))
+
+  (defn search-for-duplicates [dir]
+    (->> (filter #(.isFile %) (file-seq (io/file dir)))
+         (map match-and-index-file)))
+
+;; main method
+
+(defn -main [dir]
+  (search-for-duplicates dir))
