@@ -15,9 +15,8 @@
 
 (defn decode-audio-file [filename fn]
   (with-open [in (AudioSystem/getAudioInputStream (io/file filename))
-              stereo-in (AudioSystem/getAudioInputStream (base-to-decoded-format (.getFormat in)) in)
-              mono-in (stereo->mono stereo-in)]
-    (fn mono-in)))
+              stereo-in (AudioSystem/getAudioInputStream (base-to-decoded-format (.getFormat in)) in)]
+    (fn stereo-in)))
 
 (defn decoded-audio-file [filename]
   (let [buffer (java.io.ByteArrayOutputStream.)]
