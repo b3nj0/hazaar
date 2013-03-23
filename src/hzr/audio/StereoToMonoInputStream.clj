@@ -24,7 +24,7 @@
             left  (+ (* b0 256) b1)
             right (+ (* b2 256) b3)
             mono (/ (+ left right) 2)]
-        (reset! (:next s) (quot mono 256))
-        (mod mono 256))
+        (reset! (:next s) (mod mono 256))
+        (quot mono 256))
       (do (reset! (:next s) -1)
           next))))
