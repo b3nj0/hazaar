@@ -1,11 +1,7 @@
 (ns hzr.audio
   (:require [clojure.java.io :as io])
   (:import [javax.sound.sampled AudioSystem AudioInputStream AudioFormat AudioFormat$Encoding DataLine$Info TargetDataLine]
-           [java.io File InputStream]
-           [hzr.audio StereoToMonoInputStream]))
-
-(defn stereo->mono [in]
-  (StereoToMonoInputStream. in))
+           [java.io File InputStream]))
 
 (defn- base-to-decoded-format [base-format]
   (let [big-endian true]
