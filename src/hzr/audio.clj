@@ -23,18 +23,3 @@
   (let [buffer (java.io.ByteArrayOutputStream.)]
     (decode-audio-file filename #(io/copy % buffer))
     (.toByteArray buffer)))
-
-(defn- microphone-format []
-  (let [sample-rate 44100
-        sample-size-in-bits 8
-        channels 1
-        signed true
-        big-endian true]
-    (AudioFormat. sample-rate sample-size-in-bits channels signed big-endian)))
-
-(defn record-microphone [fn]
-  (let [info (DataLine$Info. (type TargetDataLine) (microphone-format))]
-    (with-open [line (AudioSystem/getLine info)]
-      (.start line)
-      (fn line)
-      (.stop line))))
