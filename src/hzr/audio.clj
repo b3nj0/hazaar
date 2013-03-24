@@ -3,13 +3,16 @@
   (:import [javax.sound.sampled AudioSystem AudioInputStream AudioFormat AudioFormat$Encoding]))
 
 (defn- base-to-decoded-format [base-format]
-  (let [big-endian true]
+  (let [sample-size-in-bits 16
+        num-channels (.getChannels base-format)
+        num-bytes-in-each-frame (* (/ sample-size-in-bits 8) num-channels)
+        big-endian true]
     (AudioFormat. AudioFormat$Encoding/PCM_SIGNED
                   (.getSampleRate base-format)
-                  16
-                  (.getChannels base-format)
-                  (* 2 (.getChannels base-format))
-                  (.getSampleRate base-format)
+                  sample-size-in-bits
+                  num-channels
+                  num-bytes-in-each-frame
+                  (.getFrameRate base-format)
                   big-endian)))
 
 (defn decode-audio-file [filename fn]
