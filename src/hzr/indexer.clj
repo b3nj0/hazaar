@@ -14,7 +14,7 @@
 ;; fingerprinting
 
 (defn fingerprint-stream [^java.io.InputStream in]
-  (let [buffer (make-array Byte/TYPE chunk-size)]
+  (let [buffer (byte-array chunk-size)]
     (loop [bc (.read in buffer)
            fingerprints []]
       (if (= bc -1)
