@@ -63,8 +63,3 @@
 (defn search-for-duplicates [dir]
   (->> (filter #(.isFile %) (file-seq (io/file dir)))
        (map match-and-index-file)))
-
-;; main method
-
-(defn -main [dir]
-  (search-for-duplicates dir))
