@@ -54,15 +54,15 @@
 (defn match-and-index-file [filename]
   (println "Matching " filename)
   (let [audio-data (audio/decoded-audio-file filename)
-        [pos  matches] (match-stream (ByteArrayInputStream. audio-data))]
+        [pos matches] (match-stream (ByteArrayInputStream. audio-data))]
     (add-to-index filename (ByteArrayInputStream. audio-data))
     (if (some #(> % 20) (vals matches))
       (println filename " matches: " (first (sort-by second > matches)))
       (println "No match for: " filename))))
 
-  (defn search-for-duplicates [dir]
-    (->> (filter #(.isFile %) (file-seq (io/file dir)))
-         (map match-and-index-file)))
+(defn search-for-duplicates [dir]
+  (->> (filter #(.isFile %) (file-seq (io/file dir)))
+       (map match-and-index-file)))
 
 ;; main method
 
