@@ -3,7 +3,7 @@
 
 ;; fast fourier transform
 
-(defn- fft [bytes]
+(defn- fft [^bytes bytes]
   "Apply a fast-fourier-transform to a byte array of PCM audio data to convert
    the time series data to frequency data."
   (let [bc (alength bytes)
@@ -14,13 +14,13 @@
 
 ;; hash frequency data
 
-(defn- magnitude [n]
+(defn- magnitude [^double n]
   (Math/log (+ 1 (Math/abs n))))
 
 (defn- find-max-mag [#^doubles xs from to]
   "Find the frequency with the highest magnitude in a given range."
   (loop [xs xs
-         i from
+         ^int i from
          ret [0 0.0]]
     (if (> i to)
       ret
