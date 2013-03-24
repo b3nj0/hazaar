@@ -34,7 +34,7 @@
 
 (defn match-stream [in]
   (let [buffer (make-array Byte/TYPE chunk-size)]
-    (loop [bc (.read in buffer 0 chunk-size)
+    (loop [bc (.read in buffer)
            pos 0
            matches {}]
       (if (or (= bc -1) (> pos 10000))
