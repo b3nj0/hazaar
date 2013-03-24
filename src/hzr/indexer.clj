@@ -21,7 +21,7 @@
         fingerprints
         (recur (.read in buffer) (conj fingerprints (fingerprint/fingerprint buffer)))))))
 
-(defn add-to-index [file ^java.io.InputStream in]
+(defn add-to-index [file in]
   (let [fingerprint-data (fingerprint-stream in)
         filename (keyword (.getPath file))
         index-data (map-indexed (fn [idx fp] {fp {idx filename}}) fingerprint-data)]
@@ -32,7 +32,7 @@
 (defn map-count [map key]
   (assoc map key (inc (get map key 0))))
 
-(defn match-stream [in]
+(defn match-stream [^java.io.InputStream in]
   (let [buffer (make-array Byte/TYPE chunk-size)]
     (loop [bc (.read in buffer)
            pos 0
