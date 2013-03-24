@@ -5,4 +5,5 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [com.googlecode.soundlibs/mp3spi "1.9.5-1"]
                  [com.github.rwl/jtransforms "2.4.0"]]
-  :warn-on-reflection true)
+  :warn-on-reflection true
+  :main hzr.main)
