@@ -14,7 +14,18 @@
 ;;; data, hashing it to find all matches, and checking their offsets.
 ;;; Where we see several matches for the same song/offset we return
 ;;; a match.
-(def fingerprint-index (atom {}))
+
+;; provide with and make index functions to make it easy to rebind an
+;; index during testing
+
+(defn make-index []
+  (atom {}))
+
+(def ^:dynamic *fingerprint-index* (atom {}))
+
+(defn with-index [index fn]
+  (binding [*fingerprint-index* index]
+    (fn)))
 
 ;; fingerprinting
 
@@ -30,7 +41,7 @@
   (let [fingerprint-data (fingerprint-stream in)
         filename (keyword (.getPath file))
         index-data (map-indexed (fn [idx fp] {fp {idx filename}}) fingerprint-data)]
-    (swap! fingerprint-index #(apply merge-with conj % index-data))))
+    (swap! *fingerprint-index* #(apply merge-with conj % index-data))))
 
 ;; matching
 
@@ -45,7 +56,7 @@
       (if (or (= bc -1) (> pos 10000))
         [pos matches]
         (let [fp (fingerprint/fingerprint buffer)
-              ms (get @fingerprint-index fp)
+              ms (get @*fingerprint-index* fp)
               offms (map (fn [[ts nm]] [(- ts pos) nm]) ms)
               newmatches (reduce map-count matches offms)]
           (if (some #(> % 20) (vals newmatches))
