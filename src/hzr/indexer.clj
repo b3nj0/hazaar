@@ -7,8 +7,13 @@
 
 (def chunk-size 8192)
 
-;; hash of fingerprint to list of songs
-;;; the contents of the index are: {fingerprint [{offset song-name}*]*}
+;; fingerprint index
+
+;; An index is a map from a fingerprint of a chunk of song to its name
+;;; and offset. We can match then match a stream by reading a chunk of
+;;; data, hashing it to find all matches, and checking their offsets.
+;;; Where we see several matches for the same song/offset we return
+;;; a match.
 (def fingerprint-index (atom {}))
 
 ;; fingerprinting
