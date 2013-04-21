@@ -14,8 +14,8 @@
 
 ;; hash frequency data
 
-(defn- magnitude [^double n]
-  (Math/log (+ 1 (Math/abs n))))
+(defn- magnitude [n]
+  (Math/log (+ 1.0 (Math/abs (double n)))))
 
 (defn- find-max-mag [#^doubles xs from to]
   "Find the frequency with the highest magnitude in a given range."

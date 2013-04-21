@@ -5,7 +5,7 @@
   (:import [java.io ByteArrayInputStream]
            [java.util Arrays]))
 
-(def chunk-size 8192)
+(def chunk-size 4096)
 
 ;; fingerprint index
 
@@ -69,10 +69,10 @@
 
 (defn match-and-index-file [filename]
   (println "Matching " filename)
-  (let [audio-data (audio/decoded-audio-file filename)
+  (let [audio-data (audio/_16bit-stereo->8bit-mono (audio/decoded-audio-file filename))
         [pos matches] (match-stream (ByteArrayInputStream. audio-data))]
     (add-to-index filename (ByteArrayInputStream. audio-data))
-    (if (some #(> % 20) (vals matches))
+    (if (some #(>= % 20) (vals matches))
       (println filename " matches: " (first (sort-by second > matches)))
       (println "No match for: " filename))))
 
